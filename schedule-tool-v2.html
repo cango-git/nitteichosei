@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>日程調整ツール</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F8F5F0;
+  --surface: #FFFFFF;
+  --ink: #1A1916;
+  --ink-soft: #7A746D;
+  --border: #E8E2DB;
+  --accent: #C85A2A;
+  --accent-light: #FBF0EB;
+  --accent-mid: #E8A882;
+  --green: #3D7A65;
+  --green-light: #EBF5F1;
+  --yellow: #D4A017;
+  --yellow-light: #FDF5E0;
+  --r0: #FBF0EB;
+  --r1: #F5C9A8;
+  --r2: #E8935A;
+  --r3: #C85A2A;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+.hidden{display:none!important}
+
+/* HEADER */
+header{
+  padding:20px 28px 16px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+}
+.logo{font-family:'DM Serif Display',serif;font-size:20px;letter-spacing:0.01em}
+.logo-sub{font-size:11px;color:var(--ink-soft);font-weight:300;margin-top:1px}
+.header-back{margin-left:auto;font-size:12px;color:var(--ink-soft);cursor:pointer;background:none;border:none;font-family:'Noto Sans JP',sans-serif;padding:6px 12px;border-radius:6px;transition:all .2s}
+.header-back:hover{background:var(--border);color:var(--ink)}
+
+/* MAIN */
+main{max-width:600px;margin:0 auto;padding:36px 20px 60px}
+
+/* TYPOGRAPHY */
+.view-title{font-family:'DM Serif Display',serif;font-size:26px;margin-bottom:6px;line-height:1.2}
+.view-sub{font-size:13px;color:var(--ink-soft);margin-bottom:28px;line-height:1.7;font-weight:300}
+
+/* CARD */
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:22px;margin-bottom:16px}
+.card-label{font-size:11px;color:var(--ink-soft);font-weight:700;letter-spacing:.06em;margin-bottom:10px;text-transform:uppercase}
+
+/* INPUT */
+.input-wrap{margin-bottom:14px}
+.input-label{font-size:12px;color:var(--ink-soft);font-weight:500;margin-bottom:5px}
+.inp{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:11px 14px;font-family:'Noto Sans JP',sans-serif;font-size:14px;background:var(--bg);color:var(--ink);outline:none;transition:border-color .2s,background .2s}
+.inp:focus{border-color:var(--accent);background:var(--surface)}
+.inp::placeholder{color:#C8C0B8}
+.inp-mono{font-size:18px;letter-spacing:.12em;font-weight:700}
+
+/* BUTTONS */
+.btn{padding:12px 24px;border-radius:9px;font-family:'Noto Sans JP',sans-serif;font-size:14px;font-weight:700;cursor:pointer;border:none;transition:all .2s;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn-full{width:100%}
+.btn-primary{background:var(--accent);color:white}
+.btn-primary:hover{background:#a8461f;transform:translateY(-1px);box-shadow:0 6px 20px rgba(200,90,42,.25)}
+.btn-primary:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-secondary{background:var(--surface);color:var(--ink);border:1.5px solid var(--border)}
+.btn-secondary:hover{border-color:var(--ink)}
+.btn-green{background:var(--green);color:white}
+.btn-green:hover{background:#2d6050}
+.btn-row{display:flex;gap:10px;margin-top:8px}
+
+/* HOME CARDS */
+.home-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.home-card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:24px 18px;cursor:pointer;transition:all .2s;text-align:center}
+.home-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,0,0,.07)}
+.home-card .icon{font-size:30px;margin-bottom:10px}
+.home-card .hc-title{font-size:14px;font-weight:700;margin-bottom:4px}
+.home-card .hc-sub{font-size:11px;color:var(--ink-soft);line-height:1.5;font-weight:300}
+.home-card-wide{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:16px 18px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:14px}
+.home-card-wide:hover{border-color:var(--accent);box-shadow:0 6px 20px rgba(0,0,0,.05)}
+
+/* SESSION ID BOX */
+.sid-box{background:var(--accent-light);border:1.5px solid var(--accent-mid);border-radius:12px;padding:18px 20px;margin-bottom:14px}
+.sid-label{font-size:10px;color:var(--accent);font-weight:700;letter-spacing:.08em;margin-bottom:6px}
+.sid-value{font-size:26px;font-family:monospace;font-weight:700;letter-spacing:.15em;color:var(--ink)}
+.sid-copy{margin-top:8px;background:none;border:none;font-size:12px;color:var(--accent);font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif;padding:0;display:flex;align-items:center;gap:4px}
+.sid-copy:hover{opacity:.7}
+
+/* PERSON LIST */
+.person-row{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--bg);border:1px solid var(--border);border-radius:9px;margin-bottom:8px}
+.av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;flex-shrink:0}
+.person-name{font-size:14px;font-weight:500;flex:1}
+.badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
+.badge-done{background:var(--green-light);color:var(--green)}
+.badge-wait{background:var(--bg);color:var(--ink-soft);border:1px solid var(--border)}
+
+/* CALENDAR */
+.cal-wrap{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px}
+.cal-head{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.cal-title{font-family:'DM Serif Display',serif;font-size:17px}
+.cal-navs{display:flex;gap:6px}
+.cal-nav{width:28px;height:28px;border:1px solid var(--border);background:var(--surface);border-radius:7px;cursor:pointer;font-size:11px;color:var(--ink-soft);transition:all .2s}
+.cal-nav:hover{border-color:var(--accent);color:var(--accent)}
+.cal-body{padding:10px 14px 14px}
+.day-hd{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;margin-bottom:4px}
+.day-hd span{font-size:10px;color:var(--ink-soft);padding:4px}
+.day-hd span:first-child{color:#C85A5A}
+.day-hd span:last-child{color:#5A7AC8}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.day{
+  aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+  border-radius:7px;font-size:13px;cursor:pointer;
+  border:1.5px solid transparent;transition:all .15s;
+  user-select:none;position:relative;
+}
+.day:hover:not(.empty):not(.past){border-color:var(--accent);color:var(--accent)}
+.day.empty{cursor:default}
+.day.past{color:#D4CEC8;cursor:default}
+.day.sel{background:var(--accent)!important;color:white!important;border-color:var(--accent)!important;font-weight:700}
+.day.tod::after{content:'';position:absolute;bottom:2px;width:4px;height:4px;border-radius:50%;background:var(--accent)}
+.day.sel.tod::after{background:white}
+.day.sun{color:#C85A5A}
+.day.sat{color:#5A7AC8}
+/* Result heatmap days */
+.day.h1{background:var(--r0)}
+.day.h2{background:var(--r1)}
+.day.h3{background:var(--r2);color:white}
+.day.hmax{background:var(--r3);color:white;font-weight:700}
+.day-cnt{position:absolute;bottom:1px;font-size:8px;font-weight:700;opacity:.9}
+
+/* TIMESLOTS */
+.ts-block{margin-bottom:12px}
+.ts-date-row{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.ts-remove{font-size:11px;color:#C8C0B8;cursor:pointer;margin-left:auto;font-weight:400}
+.ts-remove:hover{color:var(--accent)}
+.ts-options{display:flex;gap:7px;flex-wrap:wrap}
+.ts-btn{padding:7px 14px;border-radius:20px;font-size:12px;font-weight:500;border:1.5px solid var(--border);background:var(--surface);cursor:pointer;font-family:'Noto Sans JP',sans-serif;transition:all .15s;color:var(--ink-soft)}
+.ts-btn.on{background:var(--accent);border-color:var(--accent);color:white}
+.ts-btn:hover:not(.on){border-color:var(--accent);color:var(--accent)}
+
+/* STATUS */
+.status-bar{display:flex;align-items:center;gap:8px;padding:12px 16px;border-radius:10px;font-size:13px;margin-bottom:16px}
+.status-pending{background:var(--yellow-light);color:var(--yellow);border:1px solid #F0DC90}
+.status-done{background:var(--green-light);color:var(--green);border:1px solid #B0D8CB}
+
+/* RESULT ITEMS */
+.result-item{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:10px}
+.result-item.all{border-color:var(--accent-mid);background:var(--accent-light)}
+.ri-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.ri-date{font-size:15px;font-weight:700}
+.ri-count{font-size:12px;font-weight:700;color:var(--accent);background:var(--surface);border:1px solid var(--accent-mid);padding:3px 10px;border-radius:20px}
+.ri-slot-row{display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap}
+.ri-slot-time{font-size:12px;color:var(--ink-soft);min-width:110px}
+.ri-slot-names{display:flex;gap:4px;flex-wrap:wrap}
+.ri-name-tag{font-size:11px;background:var(--green-light);color:var(--green);padding:2px 8px;border-radius:10px;font-weight:500}
+
+/* EMAIL BTN */
+.email-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:16px;border-radius:12px;background:var(--green);color:white;font-family:'Noto Sans JP',sans-serif;font-size:14px;font-weight:700;text-decoration:none;cursor:pointer;border:none;transition:all .2s;margin-top:4px}
+.email-btn:hover{background:#2d6050;transform:translateY(-1px);box-shadow:0 6px 20px rgba(61,122,101,.3)}
+
+/* HEAT LEGEND */
+.heat-legend{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:0 14px 14px;font-size:11px;color:var(--ink-soft)}
+.hl-box{width:14px;height:14px;border-radius:3px;flex-shrink:0}
+
+/* DIVIDER */
+.div{height:1px;background:var(--border);margin:16px 0}
+
+/* LOADING */
+.loading{text-align:center;padding:48px;color:var(--ink-soft);font-size:13px}
+.spin{display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-left:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:white;padding:9px 22px;border-radius:8px;font-size:13px;font-weight:500;opacity:0;transition:opacity .3s;pointer-events:none;z-index:9999;white-space:nowrap}
+.toast.on{opacity:1}
+
+/* ANIM */
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.view{animation:up .35s ease}
+
+/* STEP BADGE */
+.step-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--accent);color:white;font-size:11px;font-weight:700;margin-right:2px;flex-shrink:0}
+
+@media(max-width:480px){
+  .home-grid{grid-template-columns:1fr}
+  main{padding:24px 14px 60px}
+  .view-title{font-size:22px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">日程調整</div>
+    <div class="logo-sub">Schedule Coordinator</div>
+  </div>
+  <button class="header-back hidden" id="back-btn" onclick="goHome()">← ホームへ</button>
+</header>
+
+<div class="toast" id="toast"></div>
+<main id="app"></main>
+
+<script>
+/* ─────────────── CONSTANTS ─────────────── */
+const API = 'https://www.jsonbase.com';
+const EMAIL = 'chanko216.yuto@gmail.com';
+const AV_COLORS = ['#C85A2A','#3D7A65','#6B5EA8','#A84E6B'];
+const SLOTS = ['午前（9〜12時）','午後（13〜17時）','夜（18〜21時）','終日OK'];
+const WD = ['日','月','火','水','木','金','土'];
+const MJ = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+
+/* ─────────────── STATE ─────────────── */
+let calY, calM;
+let selDates = []; // date strings
+let tsMap = {};    // {dateStr: [slots]}
+let ctx = {};      // current context data
+
+/* ─────────────── INIT ─────────────── */
+function init(){
+  const t = new Date();
+  calY = t.getFullYear(); calM = t.getMonth();
+  selDates = []; tsMap = {};
+  const p = new URLSearchParams(location.search);
+  const sid = p.get('sid'), name = p.get('name');
+  if(sid && name) showView('cal', {sid, name: decodeURIComponent(name)});
+  else if(sid) showView('results', {sid});
+  else showView('home');
+}
+
+/* ─────────────── ROUTER ─────────────── */
+function showView(v, data={}){
+  ctx = data;
+  document.getElementById('back-btn').classList.toggle('hidden', v==='home');
+  const app = document.getElementById('app');
+  const map = {
+    home: vHome, create: vCreate, created: vCreated,
+    join: vJoin, cal: vCal, done: vDone, results: vResults
+  };
+  app.innerHTML = `<div class="view">${(map[v]||vHome)(data)}</div>`;
+  if(v==='cal') { renderCal(); renderTS(); }
+  if(v==='results') loadResults(data.sid||'');
+}
+function goHome(){ showView('home'); }
+
+/* ─────────────── HOME ─────────────── */
+function vHome(){
+  return `
+    <p class="view-title">みんなの予定を<br>ひとつに。</p>
+    <p class="view-sub">3〜4人の空き日程・時間帯を集めて、<br>ベストな日程を自動で見つけます。</p>
+    <div class="home-grid">
+      <div class="home-card" onclick="showView('create')">
+        <div class="icon">✨</div>
+        <div class="hc-title">イベントを作成</div>
+        <div class="hc-sub">参加者を登録して<br>日程調整をスタート</div>
+      </div>
+      <div class="home-card" onclick="showView('join')">
+        <div class="icon">📩</div>
+        <div class="hc-title">日程を回答する</div>
+        <div class="hc-sub">IDを入力して<br>自分の予定を登録</div>
+      </div>
+    </div>
+    <div class="home-card-wide" onclick="showView('results',{})">
+      <span style="font-size:24px">📊</span>
+      <div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:2px">結果・回答状況を確認</div>
+        <div style="font-size:11px;color:var(--ink-soft);font-weight:300">IDを入力して最適日程・メール送信へ</div>
+      </div>
+      <span style="margin-left:auto;color:var(--ink-soft);font-size:16px">›</span>
+    </div>`;
+}
+
+/* ─────────────── CREATE ─────────────── */
+function vCreate(){
+  return `
+    <p class="view-title">イベントを作成</p>
+    <p class="view-sub">参加者の名前を登録するとセッションIDが発行されます。<br>IDを参加者にシェアして日程回収を始めましょう。</p>
+    <div class="card">
+      <div class="input-wrap">
+        <div class="input-label">イベント名（任意）</div>
+        <input class="inp" id="ev-name" type="text" placeholder="例：4月の飲み会、チームMTG">
+      </div>
+      <div class="input-label">参加者の名前（2〜4人）</div>
+      <div id="pnames">
+        ${[0,1,2,3].map(i=>`
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <div class="av" id="av${i}" style="background:${AV_COLORS[i]}">${i+1}</div>
+            <input class="inp" id="pn${i}" type="text"
+              placeholder="${i<2?'名前を入力':'（任意）'}"
+              oninput="updAv(${i})"
+              style="flex:1">
+          </div>`).join('')}
+      </div>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="doCreate()">セッションを作成する →</button>`;
+}
+function updAv(i){
+  const v = document.getElementById('pn'+i)?.value||'';
+  const av = document.getElementById('av'+i);
+  if(av) av.textContent = v ? v[0] : (i+1);
+}
+async function doCreate(){
+  const evName = document.getElementById('ev-name')?.value?.trim()||'日程調整';
+  const ppl = [0,1,2,3].map(i=>document.getElementById('pn'+i)?.value?.trim()).filter(Boolean);
+  if(ppl.length < 2){ toast('2人以上の名前を入力してください'); return; }
+  const btn = document.querySelector('.btn-primary');
+  btn.disabled = true; btn.textContent = '作成中...';
+  try {
+    const sid = genId();
+    await apiSet(`${sid}/s`, { n: evName, p: ppl, c: new Date().toISOString() });
+    showView('created', { sid, evName, ppl });
+  } catch(e) { toast('エラーが発生しました'); btn.disabled=false; btn.textContent='セッションを作成する →'; }
+}
+
+/* ─────────────── CREATED ─────────────── */
+function vCreated({sid, evName, ppl}){
+  const rows = ppl.map((n,i)=>`
+    <div class="person-row">
+      <div class="av" style="background:${AV_COLORS[i]}">${n[0]}</div>
+      <span class="person-name">${n}</span>
+      <button class="btn btn-secondary" style="font-size:11px;padding:6px 12px"
+        onclick="copyMsg('${sid}','${n.replace(/'/g,"\\'")}','${evName.replace(/'/g,"\\'")}')">
+        📋 コピー
+      </button>
+    </div>`).join('');
+  return `
+    <p class="view-title">✅ 作成完了！</p>
+    <p class="view-sub">このセッションIDを参加者全員にシェアしてください。</p>
+    <div class="sid-box">
+      <div class="sid-label">SESSION ID</div>
+      <div class="sid-value">${sid}</div>
+      <button class="sid-copy" onclick="clipCopy('${sid}')">📋 IDをコピー</button>
+    </div>
+    <div class="card">
+      <div class="card-label">参加者ごとの案内文</div>
+      ${rows}
+      <p style="font-size:11px;color:var(--ink-soft);margin-top:10px;font-weight:300">
+        ▲ 各参加者へ「コピー」して送ってください。
+      </p>
+    </div>
+    <div class="div"></div>
+    <button class="btn btn-secondary btn-full" onclick="showView('results',{sid:'${sid}'})">
+      📊 回答状況・結果を確認する
+    </button>`;
+}
+function copyMsg(sid, name, evName){
+  const msg = `【日程調整のご案内】${evName}\n\n空き日程を教えてください！\n\n① HTMLファイルを開く\n② 「日程を回答する」をタップ\n③ セッションID：${sid}\n④ 名前「${name}」を選んで回答`;
+  clipCopy(msg);
+  toast(`${name}さん用メッセージをコピーしました`);
+}
+
+/* ─────────────── JOIN ─────────────── */
+function vJoin(){
+  return `
+    <p class="view-title">日程を回答する</p>
+    <p class="view-sub">主催者から受け取ったセッションIDを入力してください。</p>
+    <div class="card">
+      <div class="input-wrap">
+        <div class="input-label">セッションID</div>
+        <input class="inp inp-mono" id="j-sid" type="text" placeholder="例：abc123xyz">
+      </div>
+      <button class="btn btn-primary btn-full" onclick="doJoin()">次へ →</button>
+    </div>
+    <div id="name-picker"></div>`;
+}
+async function doJoin(){
+  const sid = document.getElementById('j-sid')?.value?.trim();
+  if(!sid){ toast('IDを入力してください'); return; }
+  const btn = document.querySelector('#app .btn-primary');
+  btn.disabled=true; btn.textContent='読み込み中...';
+  try {
+    const sess = await apiGet(`${sid}/s`);
+    if(!sess||!sess.p){ toast('セッションが見つかりません'); btn.disabled=false; btn.textContent='次へ →'; return; }
+    document.getElementById('name-picker').innerHTML = `
+      <div class="card" style="animation:up .3s ease">
+        <div class="card-label">「${sess.n}」— あなたの名前を選択</div>
+        ${sess.p.map((n,i)=>`
+          <button class="btn btn-secondary btn-full" style="margin-bottom:8px;justify-content:flex-start;gap:10px"
+            onclick="startCal('${sid}','${n}')">
+            <div class="av" style="background:${AV_COLORS[i]}">${n[0]}</div>${n}
+          </button>`).join('')}
+      </div>`;
+    btn.disabled=false; btn.textContent='次へ →';
+  } catch(e){ toast('エラーが発生しました'); btn.disabled=false; btn.textContent='次へ →'; }
+}
+async function startCal(sid, name){
+  try {
+    const existing = await apiGet(`${sid}/r${await getPIdx(sid,name)}`);
+    if(existing?.t && !confirm(`${name}さんはすでに回答済みです。上書きしますか？`)) return;
+  } catch(e){}
+  selDates=[]; tsMap={};
+  showView('cal',{sid,name});
+}
+async function getPIdx(sid,name){
+  const sess = await apiGet(`${sid}/s`);
+  return sess.p.indexOf(name);
+}
+
+/* ─────────────── CALENDAR VIEW ─────────────── */
+function vCal({name}){
+  return `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+      <div class="av" style="background:${AV_COLORS[0]}">${name[0]}</div>
+      <p class="view-title" style="margin-bottom:0">${name}さんの空き日程</p>
+    </div>
+    <p class="view-sub" style="padding-left:40px">参加できる日をタップ → 時間帯を選択してください</p>
+    <div class="cal-wrap">
+      <div class="cal-head">
+        <span class="cal-title" id="cal-lbl"></span>
+        <div class="cal-navs">
+          <button class="cal-nav" onclick="chMon(-1)">←</button>
+          <button class="cal-nav" onclick="chMon(1)">→</button>
+        </div>
+      </div>
+      <div class="cal-body">
+        <div class="day-hd"><span>日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span></div>
+        <div class="days" id="cal-days"></div>
+      </div>
+    </div>
+    <div id="ts-section"></div>
+    <div id="submit-wrap">
+      <button class="btn btn-primary btn-full" id="sub-btn" disabled onclick="doSubmit()">
+        回答を送信する →
+      </button>
+    </div>`;
+}
+function renderCal(){
+  const lbl = document.getElementById('cal-lbl');
+  if(!lbl) return;
+  lbl.textContent = `${calY}年 ${MJ[calM]}`;
+  const grid = document.getElementById('cal-days');
+  grid.innerHTML='';
+  const today = new Date(); today.setHours(0,0,0,0);
+  const fd = new Date(calY,calM,1).getDay();
+  const dm = new Date(calY,calM+1,0).getDate();
+  for(let i=0;i<fd;i++){ const e=document.createElement('div'); e.className='day empty'; grid.appendChild(e); }
+  for(let d=1;d<=dm;d++){
+    const ds = fmt(calY,calM+1,d);
+    const dt = new Date(calY,calM,d);
+    const past = dt<today, sel = selDates.includes(ds), dow = dt.getDay();
+    const el = document.createElement('div');
+    el.className = 'day'+(past?' past':'')+(sel?' sel':'')
+      +(!sel&&dow===0?' sun':'')+ (!sel&&dow===6?' sat':'')
+      +(dt.toDateString()===today.toDateString()?' tod':'');
+    el.textContent=d;
+    if(!past) el.onclick=()=>togDate(ds);
+    grid.appendChild(el);
+  }
+}
+function togDate(ds){
+  if(selDates.includes(ds)){ selDates=selDates.filter(x=>x!==ds); delete tsMap[ds]; }
+  else { selDates.push(ds); selDates.sort(); }
+  renderCal(); renderTS(); chkSub();
+}
+function chMon(d){ calM+=d; if(calM<0){calM=11;calY--;}if(calM>11){calM=0;calY++;} renderCal(); }
+function renderTS(){
+  const sec = document.getElementById('ts-section');
+  if(!sec) return;
+  if(!selDates.length){ sec.innerHTML=''; return; }
+  sec.innerHTML = `<div class="card" style="margin-bottom:16px">
+    <div class="card-label">⏰ 各日の時間帯を選択（複数OK）</div>
+    ${selDates.map(ds=>{
+      const dt=new Date(ds), m=dt.getMonth()+1, d=dt.getDate(), w=WD[dt.getDay()];
+      const on=tsMap[ds]||[];
+      return `<div class="ts-block">
+        <div class="ts-date-row">📍 ${m}月${d}日（${w}）
+          <span class="ts-remove" onclick="remDate('${ds}')">✕ 削除</span>
+        </div>
+        <div class="ts-options">
+          ${SLOTS.map(s=>`<button class="ts-btn${on.includes(s)?' on':''}"
+            onclick="togSlot('${ds}','${s}')">${s}</button>`).join('')}
+        </div>
+      </div>`;
+    }).join('<div class="div"></div>')}
+  </div>`;
+  chkSub();
+}
+function remDate(ds){ selDates=selDates.filter(x=>x!==ds); delete tsMap[ds]; renderCal(); renderTS(); chkSub(); }
+function togSlot(ds,s){
+  if(!tsMap[ds])tsMap[ds]=[];
+  const i=tsMap[ds].indexOf(s);
+  if(i===-1)tsMap[ds].push(s); else tsMap[ds].splice(i,1);
+  renderTS();
+}
+function chkSub(){
+  const btn=document.getElementById('sub-btn');
+  if(btn) btn.disabled=!selDates.some(d=>tsMap[d]?.length>0);
+}
+async function doSubmit(){
+  const btn=document.getElementById('sub-btn');
+  btn.disabled=true; btn.innerHTML='送信中... <span class="spin"></span>';
+  const {sid,name}=ctx;
+  try {
+    const sess = await apiGet(`${sid}/s`);
+    const idx = sess.p.indexOf(name);
+    await apiSet(`${sid}/r${idx}`, {name, dates:tsMap, t:new Date().toISOString()});
+    // Check if all done
+    let allDone=true;
+    for(let i=0;i<sess.p.length;i++){
+      const r=await apiGet(`${sid}/r${i}`);
+      if(!r||!r.t){allDone=false;break;}
+    }
+    showView('done',{sid,name,allDone,evName:sess.n});
+  } catch(e){ toast('送信エラーが発生しました'); btn.disabled=false; btn.textContent='回答を送信する →'; }
+}
+
+/* ─────────────── DONE ─────────────── */
+function vDone({sid,name,allDone,evName}){
+  return `
+    <div style="text-align:center;padding:20px 0">
+      <div style="font-size:52px;margin-bottom:16px">${allDone?'🎉':'✅'}</div>
+      <p class="view-title" style="text-align:center">${allDone?'全員が揃いました！':'回答しました！'}</p>
+      <p class="view-sub" style="text-align:center">${name}さんの予定を登録しました。</p>
+      ${allDone
+        ? `<div class="status-bar status-done" style="justify-content:center">🎉 全員の回答が完了しました！</div>`
+        : `<div class="status-bar status-pending" style="justify-content:center">⏳ 他のメンバーの回答を待っています</div>`}
+      <button class="btn btn-secondary btn-full" style="margin-top:12px"
+        onclick="showView('results',{sid:'${sid}'})">
+        📊 回答状況・最適日程を確認する
+      </button>
+    </div>`;
+}
+
+/* ─────────────── RESULTS ─────────────── */
+function vResults({sid}){
+  return `
+    <p class="view-title">回答状況・最適日程</p>
+    <p class="view-sub" style="margin-bottom:20px">セッションIDを入力して結果を確認します。<br>全員回答完了後にメール送信ボタンが表示されます。</p>
+    <div class="card" style="margin-bottom:16px">
+      <div class="input-wrap" style="margin-bottom:10px">
+        <input class="inp inp-mono" id="r-sid" type="text" placeholder="セッションID" value="${sid||''}">
+      </div>
+      <button class="btn btn-primary btn-full" id="r-load-btn" onclick="loadResults()">確認する →</button>
+    </div>
+    <div id="r-content"></div>`;
+}
+async function loadResults(initSid){
+  let sid = initSid;
+  if(!sid){ const el=document.getElementById('r-sid'); sid=el?.value?.trim(); }
+  if(!sid) return;
+  // update input if pre-filled
+  const inp = document.getElementById('r-sid');
+  if(inp) inp.value=sid;
+  const content=document.getElementById('r-content');
+  const btn=document.getElementById('r-load-btn');
+  if(btn){btn.disabled=true;btn.innerHTML='読み込み中... <span class="spin"></span>';}
+  content.innerHTML='<div class="loading">読み込み中 <span class="spin"></span></div>';
+  try {
+    const sess=await apiGet(`${sid}/s`);
+    if(!sess||!sess.p){ content.innerHTML='<div class="card" style="text-align:center;color:var(--ink-soft)">セッションが見つかりません</div>'; if(btn){btn.disabled=false;btn.textContent='確認する →';} return; }
+    const responses=[];
+    for(let i=0;i<sess.p.length;i++){
+      const r=await apiGet(`${sid}/r${i}`);
+      responses.push(r&&r.t?r:null);
+    }
+    const allDone=responses.every(r=>r!==null);
+    content.innerHTML=buildResults(sess,responses,allDone);
+    if(allDone) setupEmailBtn(sess,responses);
+    if(btn){btn.disabled=false;btn.textContent='↺ 更新する';}
+  } catch(e){ content.innerHTML='<div class="card" style="text-align:center;color:var(--ink-soft)">エラーが発生しました</div>'; if(btn){btn.disabled=false;btn.textContent='確認する →';} }
+}
+function buildResults(sess,responses,allDone){
+  const {n:evName, p:ppl}=sess;
+  const responded=responses.filter(Boolean).length;
+
+  // Aggregate: dateStr -> slotStr -> [names]
+  const agg={};
+  responses.forEach(r=>{
+    if(!r) return;
+    Object.entries(r.dates||{}).forEach(([ds,slots])=>{
+      if(!agg[ds])agg[ds]={};
+      slots.forEach(sl=>{
+        if(!agg[ds][sl])agg[ds][sl]=[];
+        agg[ds][sl].push(r.name);
+      });
+    });
+  });
+
+  // Date summary
+  const dsumm={};
+  Object.entries(agg).forEach(([ds,slots])=>{
+    const all=new Set(); Object.values(slots).forEach(ns=>ns.forEach(n=>all.add(n)));
+    dsumm[ds]={count:all.size,names:[...all],slots};
+  });
+  const sorted=Object.entries(dsumm).sort((a,b)=>b[1].count-a[1].count||a[0].localeCompare(b[0]));
+  const allM=sorted.filter(([,v])=>v.count===ppl.length);
+  const partM=sorted.filter(([,v])=>v.count>1&&v.count<ppl.length);
+
+  // Status
+  let html=`
+    <div class="status-bar ${allDone?'status-done':'status-pending'}">
+      ${allDone?`🎉 全員の回答が揃いました！`:`⏳ ${responded}/${ppl.length}人が回答済み`}
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-label">📋 ${evName} — 回答状況</div>
+      ${ppl.map((n,i)=>{
+        const done=!!responses[i];
+        return `<div class="person-row">
+          <div class="av" style="background:${AV_COLORS[i]}">${n[0]}</div>
+          <span class="person-name">${n}</span>
+          <span class="badge ${done?'badge-done':'badge-wait'}">${done?'✅ 回答済み':'⏳ 未回答'}</span>
+        </div>`;
+      }).join('')}
+    </div>`;
+
+  if(!sorted.length){
+    html+=`<div class="card" style="text-align:center;color:var(--ink-soft);font-size:13px">まだ回答がありません</div>`;
+    return html;
+  }
+
+  // Result calendar (use first month with data)
+  const firstDs=sorted[0][0];
+  const [ry,rm]=firstDs.split('-').map(Number);
+  html+=buildResultCal(ry,rm-1,dsumm,ppl.length);
+
+  if(allM.length){
+    html+=`<div class="card" style="border-color:var(--accent-mid);margin-bottom:14px">
+      <div class="card-label" style="color:var(--accent)">✨ 全員参加可能な日程</div>
+      ${allM.map(([ds,v])=>riHTML(ds,v,ppl,true)).join('')}
+    </div>`;
+  }
+  if(partM.length){
+    html+=`<div class="card" style="margin-bottom:14px">
+      <div class="card-label">👥 複数人が参加可能な日程</div>
+      ${partM.map(([ds,v])=>riHTML(ds,v,ppl,false)).join('')}
+    </div>`;
+  }
+  if(!allDone){
+    html+=`<button class="btn btn-secondary btn-full" onclick="loadResults()">↺ 回答状況を更新する</button>`;
+  } else {
+    html+=`<div id="email-wrap"></div>`;
+  }
+  return html;
+}
+
+function buildResultCal(ry,rm,dsumm,total){
+  const fd=new Date(ry,rm,1).getDay();
+  const dm=new Date(ry,rm+1,0).getDate();
+  let days='';
+  for(let i=0;i<fd;i++) days+=`<div class="day empty"></div>`;
+  for(let d=1;d<=dm;d++){
+    const ds=fmt(ry,rm+1,d);
+    const cnt=dsumm[ds]?.count||0;
+    let cls='';
+    if(cnt>0){
+      if(cnt===total) cls='hmax';
+      else if(cnt>=3) cls='h3';
+      else if(cnt>=2) cls='h2';
+      else cls='h1';
+    }
+    days+=`<div class="day ${cls}">${d}${cnt>0?`<span class="day-cnt">${cnt}人</span>`:''}</div>`;
+  }
+  return `
+    <div class="cal-wrap" style="margin-bottom:16px">
+      <div class="cal-head">
+        <span class="cal-title">${ry}年 ${MJ[rm]}</span>
+      </div>
+      <div class="cal-body">
+        <div class="day-hd"><span>日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span></div>
+        <div class="days">${days}</div>
+      </div>
+      <div class="heat-legend">
+        <div class="hl-box" style="background:var(--r0)"></div>1人
+        <div class="hl-box" style="background:var(--r1)"></div>2人
+        <div class="hl-box" style="background:var(--r2)"></div>3人
+        <div class="hl-box" style="background:var(--r3)"></div>全員
+      </div>
+    </div>`;
+}
+
+function riHTML(ds,v,ppl,isAll){
+  const dt=new Date(ds),m=dt.getMonth()+1,d=dt.getDate(),w=WD[dt.getDay()];
+  const slotRows=Object.entries(v.slots).map(([sl,ns])=>`
+    <div class="ri-slot-row">
+      <span class="ri-slot-time">${sl}</span>
+      <div class="ri-slot-names">${ns.map(n=>`<span class="ri-name-tag">${n}</span>`).join('')}</div>
+    </div>`).join('');
+  return `<div class="result-item ${isAll?'all':''}">
+    <div class="ri-head">
+      <span class="ri-date">${m}月${d}日（${w}）</span>
+      <span class="ri-count">${v.count}/${ppl.length}人</span>
+    </div>
+    <div>${slotRows}</div>
+  </div>`;
+}
+
+function setupEmailBtn(sess,responses){
+  const wrap=document.getElementById('email-wrap');
+  if(!wrap) return;
+  const {n:evName,p:ppl}=sess;
+  const agg={};
+  responses.forEach(r=>{
+    if(!r) return;
+    Object.entries(r.dates||{}).forEach(([ds,slots])=>{
+      if(!agg[ds])agg[ds]={};
+      slots.forEach(sl=>{ if(!agg[ds][sl])agg[ds][sl]=[]; agg[ds][sl].push(r.name); });
+    });
+  });
+  const dsumm={};
+  Object.entries(agg).forEach(([ds,slots])=>{
+    const all=new Set(); Object.values(slots).forEach(ns=>ns.forEach(n=>all.add(n)));
+    dsumm[ds]={count:all.size,names:[...all],slots};
+  });
+  const sorted=Object.entries(dsumm).sort((a,b)=>b[1].count-a[1].count||a[0].localeCompare(b[0]));
+  const allM=sorted.filter(([,v])=>v.count===ppl.length);
+  const partM=sorted.filter(([,v])=>v.count>1&&v.count<ppl.length);
+
+  let body=`【日程調整が完了しました】${evName}\n`;
+  body+=`参加者：${ppl.join('、')}\n\n`;
+  if(allM.length){
+    body+=`■ 全員参加可能な日程\n`;
+    allM.forEach(([ds,v])=>{
+      const dt=new Date(ds),m=dt.getMonth()+1,d=dt.getDate(),w=WD[dt.getDay()];
+      body+=`\n・${m}月${d}日（${w}）\n`;
+      Object.entries(v.slots).forEach(([sl,ns])=>body+=`  ${sl}：${ns.join('、')}\n`);
+    });
+  } else body+=`■ 全員参加可能な日程：なし\n`;
+  if(partM.length){
+    body+=`\n■ 複数人が参加可能な日程\n`;
+    partM.forEach(([ds,v])=>{
+      const dt=new Date(ds),m=dt.getMonth()+1,d=dt.getDate(),w=WD[dt.getDay()];
+      body+=`\n・${m}月${d}日（${w}）— ${v.count}人参加可能\n`;
+      Object.entries(v.slots).forEach(([sl,ns])=>body+=`  ${sl}：${ns.join('、')}\n`);
+    });
+  }
+  body+=`\n──\n日程調整ツールより自動送信`;
+
+  const subj=encodeURIComponent(`【日程調整完了】${evName}`);
+  const bodyEnc=encodeURIComponent(body);
+  wrap.innerHTML=`
+    <a class="email-btn" href="mailto:${EMAIL}?subject=${subj}&body=${bodyEnc}">
+      📧 結果をメールで送信する
+    </a>
+    <p style="text-align:center;font-size:11px;color:var(--ink-soft);margin-top:8px;font-weight:300">
+      クリックするとメールアプリが開きます（送信先：${EMAIL}）
+    </p>`;
+}
+
+/* ─────────────── UTILS ─────────────── */
+function fmt(y,m,d){ return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
+function genId(){ const c='abcdefghijklmnopqrstuvwxyz0123456789'; let s=''; for(let i=0;i<12;i++) s+=c[Math.floor(Math.random()*c.length)]; return s; }
+
+async function apiGet(path){
+  const r=await fetch(`${API}/${path}`);
+  if(!r.ok) throw new Error('API error');
+  const d=await r.json();
+  return d.result??null;
+}
+async function apiSet(path,val){
+  const r=await fetch(`${API}/${path}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(val)});
+  if(!r.ok) throw new Error('API error');
+}
+
+async function clipCopy(text){
+  try{ await navigator.clipboard.writeText(text); toast('コピーしました！'); }
+  catch(e){ toast('コピーできませんでした'); }
+}
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('on');
+  setTimeout(()=>el.classList.remove('on'),2500);
+}
+
+/* ─────────────── START ─────────────── */
+init();
+</script>
+</body>
+</html>
